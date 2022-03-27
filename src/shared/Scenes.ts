@@ -12,6 +12,13 @@ import {
 } from '../renderer/visualizer/threejs/EffectTypes'
 
 export const DEFAULT_GROUP = 'Default'
+export const suggestedGroups = [
+  DEFAULT_GROUP,
+  'Natural',
+  'Strobe',
+  'Moving',
+  'Laser',
+]
 
 interface Scene_base {
   name: string
@@ -22,6 +29,8 @@ interface Scene_base {
 export interface SplitScene_t {
   baseParams: Partial<Params>
   randomizer: RandomizerOptions
+  // The 1st, guaranteed SplitScene is treated different from the rest.
+  // If groups is empty, the scene applys to all groups, except any specified in other splits
   groups: string[]
 }
 export function initSplitScene(): SplitScene_t {
@@ -33,9 +42,7 @@ export function initSplitScene(): SplitScene_t {
 }
 export interface LightScene_t extends Scene_base {
   modulators: Modulator[]
-  baseParams: Partial<Params>
-  randomizer: RandomizerOptions
-  splitScenes: SplitScene_t[]
+  splits: SplitScene_t[] // <-- There must be at least 1 SplitScene in a given LightScene.
 }
 
 export function initLightScene(): LightScene_t {
@@ -44,9 +51,7 @@ export function initLightScene(): LightScene_t {
     bombacity: 0,
     autoEnabled: true,
     modulators: [initModulator(0)],
-    baseParams: initBaseParams(),
-    randomizer: initRandomizerOptions(),
-    splitScenes: [],
+    splits: [initSplitScene()],
   }
 }
 
