@@ -7,7 +7,7 @@ import XYAxispad from './XYAxisPad'
 import ParamAddButton from './ParamAddButton'
 
 interface Params {
-  splitIndex: number | null
+  splitIndex: number
 }
 
 export default function ParamsControl({ splitIndex }: Params) {

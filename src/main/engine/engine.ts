@@ -19,11 +19,7 @@ import { calculateDmx } from './dmxEngine'
 import { handleAutoScene } from '../../shared/autoScene'
 import { setActiveScene } from '../../renderer/redux/controlSlice'
 import TapTempoEngine from './TapTempoEngine'
-import {
-  getAllSplitSceneGroups,
-  getFixturesInGroups,
-  getFixturesNotInGroups,
-} from '../../shared/dmxUtil'
+import { getSplitGroups, getFixturesInGroups } from '../../shared/dmxUtil'
 
 let _nodeLink = new NodeLink()
 let _ipcCallbacks: IPC_Callbacks | null = null
@@ -175,38 +171,23 @@ function getNextRealtimeState(
     }
   )
 
-  const outputParams = getOutputParams(nextTimeState.beats, scene, null)
-
   let newRandomizerState = resizeRandomizer(
     realtimeState.randomizer,
     dmx.universe.length
   )
 
-  let splitGroups = getAllSplitSceneGroups(scene)
-  let mainSceneFixtures = getFixturesNotInGroups(dmx.universe, splitGroups)
-  let mainSceneFixturesWithinEpicness = mainSceneFixtures.filter(
-    ({ fixture }) =>
-      dmx.fixtureTypesByID[fixture.type].epicness <= outputParams.epicness
-  )
-
-  newRandomizerState = updateIndexes(
-    realtimeState.time.beats,
-    newRandomizerState,
-    nextTimeState,
-    mainSceneFixturesWithinEpicness.map(({ universeIndex }) => universeIndex),
-    scene.randomizer
-  )
-
-  const splitScenes = scene.splitScenes.map((_split, splitIndex) => {
+  const splits = scene.splits.map((split, splitIndex) => {
     const splitOutputParams = getOutputParams(
       nextTimeState.beats,
       scene,
       splitIndex
     )
-    let splitSceneFixtures = getFixturesInGroups(dmx.universe, _split.groups)
+    let splitGroups = getSplitGroups(scene, splitIndex, dmx.activeGroups)
+    let splitSceneFixtures = getFixturesInGroups(dmx.universe, splitGroups)
     let splitSceneFixturesWithinEpicness = splitSceneFixtures.filter(
       ({ fixture }) =>
-        dmx.fixtureTypesByID[fixture.type].epicness <= outputParams.epicness
+        dmx.fixtureTypesByID[fixture.type].epicness <=
+        splitOutputParams.epicness
     )
     newRandomizerState = updateIndexes(
       realtimeState.time.beats,
@@ -215,7 +196,7 @@ function getNextRealtimeState(
       splitSceneFixturesWithinEpicness.map(
         ({ universeIndex }) => universeIndex
       ),
-      _split.randomizer
+      split.randomizer
     )
     return {
       outputParams: splitOutputParams,
@@ -223,15 +204,9 @@ function getNextRealtimeState(
   })
 
   return {
-    outputParams,
     time: nextTimeState,
     randomizer: newRandomizerState,
-    dmxOut: calculateDmx(
-      controlState,
-      outputParams,
-      newRandomizerState,
-      splitScenes
-    ),
-    splitScenes,
+    dmxOut: calculateDmx(controlState, newRandomizerState, splits),
+    splits,
   }
 }

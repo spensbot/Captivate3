@@ -45,7 +45,7 @@ interface IncrementModulatorPayload {
 }
 
 interface SetModulationPayload {
-  splitIndex: number | null
+  splitIndex: number
   modIndex: number
   param: Param
   value: number | undefined
@@ -88,7 +88,7 @@ type ScopedAction<T> = PayloadAction<{
 }>
 
 type ParamsAction = PayloadAction<{
-  splitIndex: number | null
+  splitIndex: number
   params: Partial<Params>
 }>
 
@@ -260,7 +260,7 @@ export const scenesSlice = createSlice({
     },
     addModulator: (state, _: PayloadAction<void>) => {
       modifyActiveLightScene(state, (scene) => {
-        scene.modulators.push(initModulator(scene.splitScenes.length))
+        scene.modulators.push(initModulator(scene.splits.length))
       })
     },
     removeModulator: (state, { payload }: PayloadAction<number>) => {
@@ -270,7 +270,7 @@ export const scenesSlice = createSlice({
     },
     resetModulator: (state, { payload }: PayloadAction<number>) => {
       modifyActiveLightScene(state, (scene) => {
-        scene.modulators[payload] = initModulator(scene.splitScenes.length)
+        scene.modulators[payload] = initModulator(scene.splits.length)
       })
     },
     setModulation: (
@@ -279,11 +279,7 @@ export const scenesSlice = createSlice({
     ) => {
       const { splitIndex, modIndex, param, value } = payload
       modifyActiveLightScene(state, (scene) => {
-        if (splitIndex === null) {
-          scene.modulators[modIndex].modulation[param] = value
-        } else {
-          scene.modulators[modIndex].splitModulations[splitIndex][param] = value
-        }
+        scene.modulators[modIndex].splitModulations[splitIndex][param] = value
       })
     },
     setBaseParams: (
@@ -292,10 +288,7 @@ export const scenesSlice = createSlice({
     ) => {
       for (let [key, value] of Object.entries(params)) {
         modifyActiveLightScene(state, (scene) => {
-          const baseParams =
-            splitIndex === null
-              ? scene.baseParams
-              : scene.splitScenes[splitIndex].baseParams
+          const baseParams = scene.splits[splitIndex].baseParams
           baseParams[key as Param] = value
         })
       }
@@ -306,10 +299,7 @@ export const scenesSlice = createSlice({
     ) => {
       for (let [key, amount] of Object.entries(params)) {
         modifyActiveLightScene(state, (scene) => {
-          const baseParams =
-            splitIndex === null
-              ? scene.baseParams
-              : scene.splitScenes[splitIndex].baseParams
+          const baseParams = scene.splits[splitIndex].baseParams
           const currentVal = baseParams[key as Param]
           if (currentVal !== undefined) {
             baseParams[key as Param] = clampNormalized(currentVal + amount)
@@ -324,20 +314,16 @@ export const scenesSlice = createSlice({
       }: PayloadAction<{
         key: keyof RandomizerOptions
         value: number
-        splitIndex: number | null
+        splitIndex: number
       }>
     ) => {
       modifyActiveLightScene(state, (scene) => {
-        if (splitIndex === null) {
-          scene.randomizer[key] = value
-        } else {
-          scene.splitScenes[splitIndex].randomizer[key] = value
-        }
+        scene.splits[splitIndex].randomizer[key] = value
       })
     },
     addSplitScene: (state, {}: PayloadAction<undefined>) => {
       modifyActiveLightScene(state, (scene) => {
-        scene.splitScenes.push(initSplitScene())
+        scene.splits.push(initSplitScene())
         scene.modulators.forEach((modulator) => {
           modulator.splitModulations.push({})
         })
@@ -345,7 +331,7 @@ export const scenesSlice = createSlice({
     },
     removeSplitSceneByIndex: (state, { payload }: PayloadAction<number>) => {
       modifyActiveLightScene(state, (scene) => {
-        scene.splitScenes.splice(payload, 1)
+        scene.splits.splice(payload, 1)
         scene.modulators.forEach((modulator) => {
           modulator.splitModulations.splice(payload, 1)
         })
@@ -358,7 +344,7 @@ export const scenesSlice = createSlice({
       }: PayloadAction<{ group: string; index: number }>
     ) => {
       modifyActiveLightScene(state, (scene) => {
-        scene.splitScenes[index].groups.push(group)
+        scene.splits[index].groups.push(group)
       })
     },
     removeSplitSceneGroup: (
@@ -368,11 +354,11 @@ export const scenesSlice = createSlice({
       }: PayloadAction<{ group: string; index: number }>
     ) => {
       modifyActiveLightScene(state, (scene) => {
-        const groupIndex = scene.splitScenes[index].groups.findIndex(
+        const groupIndex = scene.splits[index].groups.findIndex(
           (g) => g === group
         )
         if (groupIndex > -1) {
-          scene.splitScenes[index].groups.splice(groupIndex, 1)
+          scene.splits[index].groups.splice(groupIndex, 1)
         }
       })
     },

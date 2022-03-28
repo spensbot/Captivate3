@@ -1,6 +1,5 @@
 import React from 'react'
 import StatusBar from '../menu/StatusBar'
-import ParamsControl from '../controls/ParamsControl'
 import Modulators from '../scenes/Modulators'
 import SceneSelection from '../scenes/SceneSelection'
 import SplitPane from '../base/SplitPane'
@@ -36,8 +35,6 @@ export default function Scenes() {
             }}
           >
             <Modulators />
-            <Sp />
-            <ParamsControl splitIndex={null} />
             <Sp />
             <SplitScenes />
           </div>

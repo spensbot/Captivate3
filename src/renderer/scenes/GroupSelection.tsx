@@ -6,7 +6,6 @@ import { useActiveLightScene, useDmxSelector } from 'renderer/redux/store'
 import styled from 'styled-components'
 import Popup from '../base/Popup'
 import { useDispatch } from 'react-redux'
-import { DEFAULT_GROUP } from 'shared/Scenes'
 import {
   removeSplitSceneByIndex,
   addSplitSceneGroup,
@@ -20,14 +19,11 @@ interface Props {
 export default function GroupSelection({ splitIndex }: Props) {
   const dispatch = useDispatch()
   const [isOpen, setIsOpen] = useState(false)
-  const availableGroups = [
-    // DEFAULT_GROUP,
-    ...useDmxSelector((dmx) => dmx.groups),
-  ]
-  const activeGroups = useActiveLightScene(
-    (scene) => scene.splitScenes[splitIndex].groups
+  const activeGroups = useDmxSelector((dmx) => dmx.activeGroups)
+  const splitGroups = useActiveLightScene(
+    (scene) => scene.splits[splitIndex].groups
   )
-  const activeGroupsString = activeGroups.join(', ')
+  const splitGroupsString = splitGroups.join(', ')
 
   return (
     <Root>
@@ -41,9 +37,7 @@ export default function GroupSelection({ splitIndex }: Props) {
         <RemoveIcon />
       </IconButton>
       <GroupName>
-        {activeGroups.length > 0
-          ? `Groups: ${activeGroupsString}`
-          : `No Groups`}
+        {splitGroups.length > 0 ? `Groups: ${splitGroupsString}` : `No Groups`}
       </GroupName>
       <IconButton
         size="small"
@@ -56,8 +50,8 @@ export default function GroupSelection({ splitIndex }: Props) {
       </IconButton>
       {isOpen && (
         <Popup title="Select Groups" onClose={() => setIsOpen(false)}>
-          {availableGroups.map((group) => {
-            const isActive = activeGroups.includes(group)
+          {activeGroups.map((group) => {
+            const isActive = splitGroups.includes(group)
             const payload = {
               index: splitIndex,
               group,

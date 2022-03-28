@@ -8,7 +8,7 @@ import Popup from '../base/Popup'
 import { useDispatch } from 'react-redux'
 import { setGroupForAllFixturesOfActiveType } from '../redux/dmxSlice'
 import { Button } from '@mui/material'
-import { DEFAULT_GROUP } from 'shared/Scenes'
+import { suggestedGroups } from 'shared/Scenes'
 
 interface Props {}
 
@@ -17,14 +17,12 @@ export default function EditGroup({}: Props) {
   const [newGroup, setNewGroup] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const activeFixtureTypeID = useDmxSelector((dmx) => dmx.activeFixtureType)
-  const availableGroups = useDmxSelector((dmx) => dmx.groups)
+  const activeGroups = useDmxSelector((dmx) => dmx.activeGroups)
   const fixtureGroupString = useDmxSelector((dmx) => {
     const groupSet: Set<string> = new Set()
     for (const fixture of dmx.universe) {
       if (fixture.type === activeFixtureTypeID) {
-        for (const group of fixture.groups) {
-          groupSet.add(group)
-        }
+        groupSet.add(fixture.group)
       }
     }
     const groups = Array.from(groupSet)
@@ -36,6 +34,11 @@ export default function EditGroup({}: Props) {
       return 'Various'
     }
   })
+
+  const availableGroups = [
+    ...suggestedGroups.filter((g) => !activeGroups.includes(g)),
+    ...activeGroups,
+  ]
 
   return (
     <Root>
@@ -51,11 +54,6 @@ export default function EditGroup({}: Props) {
       </IconButton>
       {isOpen && (
         <Popup title="Edit Group" onClose={() => setIsOpen(false)}>
-          <AvailableGroup
-            onClick={() => dispatch(setGroupForAllFixturesOfActiveType(null))}
-          >
-            {DEFAULT_GROUP}
-          </AvailableGroup>
           {availableGroups.map((group) => (
             <AvailableGroup
               key={group}

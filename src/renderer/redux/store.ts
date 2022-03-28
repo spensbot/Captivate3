@@ -193,21 +193,17 @@ export function useDeviceSelector<T>(getVal: (midi: DeviceState) => T) {
 
 export function useBaseParam(
   param: Param,
-  splitIndex: number | null
+  splitIndex: number
 ): number | undefined {
   const baseParam = useActiveLightScene((state) => {
-    return splitIndex === null
-      ? state.baseParams[param]
-      : state.splitScenes[splitIndex].baseParams[param]
+    return state.splits[splitIndex].baseParams[param]
   })
   return baseParam
 }
 
-export function useBaseParams(splitIndex: number | null): Partial<Params> {
+export function useBaseParams(splitIndex: number): Partial<Params> {
   const baseParams = useActiveLightScene((state) => {
-    return splitIndex === null
-      ? state.baseParams
-      : state.splitScenes[splitIndex].baseParams
+    return state.splits[splitIndex].baseParams
   })
   return baseParams
 }
@@ -215,14 +211,10 @@ export function useBaseParams(splitIndex: number | null): Partial<Params> {
 export function useModParam(
   param: Param,
   modIndex: number,
-  splitIndex: number | null
+  splitIndex: number
 ) {
   return useActiveLightScene((scene) => {
     const modulator = scene.modulators[modIndex]
-    if (splitIndex === null) {
-      return modulator.modulation[param]
-    } else {
-      return modulator.splitModulations[splitIndex][param]
-    }
+    return modulator.splitModulations[splitIndex][param]
   })
 }

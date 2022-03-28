@@ -116,13 +116,22 @@ export function applyRandomization(
   return lerp(value, value * point.level, randomizationAmount)
 }
 
-export function getAllSplitSceneGroups(activeScene: LightScene_t) {
-  return activeScene.splitScenes.reduce<Set<string>>((accum, splitScene) => {
-    for (const group of splitScene.groups) {
-      accum.add(group)
-    }
-    return accum
-  }, new Set())
+export function getSplitGroups(
+  scene: LightScene_t,
+  splitIndex: number,
+  activeGroups: string[]
+) {
+  const groups = scene.splits[splitIndex].groups
+  if (splitIndex === 0 && groups.length === 0) {
+    const auxSplits = scene.splits.slice(1)
+    const auxSplitGroups = auxSplits.reduce<string[]>(
+      (acc, split) => acc.concat(split.groups),
+      []
+    )
+    return activeGroups.filter((group) => !auxSplitGroups.includes(group))
+  } else {
+    return groups
+  }
 }
 
 export interface UniverseFixture {
@@ -134,17 +143,8 @@ export function getFixturesWithIndexes(universe: Universe): UniverseFixture[] {
   return universe.map((fixture, universeIndex) => ({ fixture, universeIndex }))
 }
 
-export function getFixturesNotInGroups(
-  universe: Universe,
-  groups: Set<string>
-) {
-  return getFixturesWithIndexes(universe).filter(
-    ({ fixture }) => !fixture.groups.find((group) => groups.has(group))
-  )
-}
-
 export function getFixturesInGroups(universe: Universe, groups: string[]) {
-  return getFixturesWithIndexes(universe).filter(
-    ({ fixture }) => !!fixture.groups.find((group) => groups.includes(group))
+  return getFixturesWithIndexes(universe).filter(({ fixture }) =>
+    groups.includes(fixture.group)
   )
 }

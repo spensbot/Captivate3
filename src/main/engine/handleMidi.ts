@@ -123,11 +123,10 @@ export function handleMessage(
         } else if (action.type === 'setBpm') {
           return rt_state.time.bpm
         } else if (action.type === 'setBaseParam') {
-          return (
-            state.control.light.byId[state.control.light.active]?.baseParams[
-              action.paramKey
-            ] || 0.5
-          )
+          const mainSplitBaseParams =
+            state.control.light.byId[state.control.light.active]?.splits[0]
+              ?.baseParams
+          return mainSplitBaseParams[action.paramKey] || 0.5
         } else if (action.type === 'setMaster') {
           return state.control.master
         } else return 0
@@ -145,7 +144,7 @@ export function handleMessage(
         } else if (action.type === 'setBaseParam') {
           dispatch(
             setBaseParams({
-              splitIndex: null,
+              splitIndex: 0,
               params: {
                 [action.paramKey]: newVal,
               },

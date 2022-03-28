@@ -10,7 +10,7 @@ import ParamXButton from './ParamXButton'
 
 interface Props {
   param: Param
-  splitIndex: number | null
+  splitIndex: number
 }
 
 export default function ParamSlider({ param, splitIndex }: Props) {

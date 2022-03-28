@@ -16,7 +16,7 @@ import PositionIcon from '@mui/icons-material/PictureInPicture'
 import axisIconSrc from '../../../assets/axis.svg'
 
 interface Props {
-  splitIndex: number | null
+  splitIndex: number
 }
 
 type ParamBundle = 'axis' | 'position'

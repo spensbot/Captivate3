@@ -1,14 +1,10 @@
 import styled from 'styled-components'
 import { useActiveLightScene, useDmxSelector } from '../redux/store'
 import { useRealtimeSelector } from 'renderer/redux/realtimeStore'
-import {
-  getAllSplitSceneGroups,
-  getFixturesInGroups,
-  getFixturesNotInGroups,
-} from 'shared/dmxUtil'
+import { getSplitGroups, getFixturesInGroups } from 'shared/dmxUtil'
 
 interface Props {
-  splitIndex: number | null
+  splitIndex: number
 }
 
 const gapRatio = 0.5
@@ -27,27 +23,18 @@ const Root = styled.div`
 `
 
 function Visualizer({ splitIndex }: Props) {
-  const { universe, fixtureTypesByID } = useDmxSelector((dmx) => dmx)
-  const activeLightScene = useActiveLightScene((scene) => scene)
-  const { randomizer, outputParams, splitScenes } = useRealtimeSelector(
-    (rtState) => rtState
+  const { universe, fixtureTypesByID, activeGroups } = useDmxSelector(
+    (dmx) => dmx
   )
+  const activeLightScene = useActiveLightScene((scene) => scene)
+  const { randomizer, splits } = useRealtimeSelector((rtState) => rtState)
 
-  let epicness =
-    splitIndex === null
-      ? outputParams.epicness
-      : splitScenes[splitIndex]?.outputParams?.epicness ?? 0
+  let epicness = splits[splitIndex]?.outputParams?.epicness ?? 0
 
-  let splitFixtures =
-    splitIndex === null
-      ? getFixturesNotInGroups(
-          universe,
-          getAllSplitSceneGroups(activeLightScene)
-        )
-      : getFixturesInGroups(
-          universe,
-          activeLightScene.splitScenes[splitIndex].groups
-        )
+  let splitFixtures = getFixturesInGroups(
+    universe,
+    getSplitGroups(activeLightScene, splitIndex, activeGroups)
+  )
 
   let splitFixturesWithinEpicness = splitFixtures.filter(
     ({ fixture }) => fixtureTypesByID[fixture.type].epicness <= epicness

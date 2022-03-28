@@ -2,7 +2,7 @@ import { useOutputParam } from '../redux/realtimeStore'
 import Cursor from '../base/Cursor'
 
 interface Props {
-  splitIndex: number | null
+  splitIndex: number
 }
 
 export default function XYCursor({ splitIndex }: Props) {

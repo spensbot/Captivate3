@@ -10,7 +10,7 @@ import MidiOverlay_xy from '../base/MidiOverlay_xy'
 import { paramBundles } from './ParamAddButton'
 
 interface Props {
-  splitIndex: number | null
+  splitIndex: number
 }
 
 export default function XYpad({ splitIndex }: Props) {

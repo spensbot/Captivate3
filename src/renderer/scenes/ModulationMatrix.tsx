@@ -5,11 +5,10 @@ import { paramsList } from '../../shared/params'
 import ModulationSlider, { AddModulationButton } from './ModulationSlider'
 
 export default function ModulationMatrix({ index }: { index: number }) {
-  const numSplits = useActiveLightScene((scene) => scene.splitScenes.length)
+  const numSplits = useActiveLightScene((scene) => scene.splits.length)
   const activeSceneId = useControlSelector((control) => control.light.active)
   return (
     <div>
-      <SplitSceneModulationMatrix modIndex={index} splitIndex={null} />
       {indexArray(numSplits).map((splitIndex) => (
         <SplitSceneModulationMatrix
           key={splitIndex + activeSceneId}
@@ -27,7 +26,7 @@ function SplitSceneModulationMatrix({
   splitIndex,
 }: {
   modIndex: number
-  splitIndex: number | null
+  splitIndex: number
 }) {
   return (
     <SplitRoot>

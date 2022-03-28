@@ -7,19 +7,17 @@ import {
   getMovingWindow,
   getDmxValue,
   applyRandomization,
-  getAllSplitSceneGroups,
+  getSplitGroups,
   getFixturesInGroups,
-  getFixturesNotInGroups,
   UniverseFixture,
 } from '../../shared/dmxUtil'
 
 export function calculateDmx(
   state: CleanReduxState,
-  outputParams: Params,
   randomizerState: RandomizerState,
   splitScenes: { outputParams: Params }[]
 ): number[] {
-  const universe = state.dmx.universe
+  const { universe, activeGroups } = state.dmx
   const fixtureTypes = state.dmx.fixtureTypesByID
 
   let channels = Array(512).fill(0)
@@ -68,14 +66,11 @@ export function calculateDmx(
       })
     }
 
-    const splitSceneGroups = getAllSplitSceneGroups(activeScene)
-
-    const mainSceneFixtures = getFixturesNotInGroups(universe, splitSceneGroups)
-
-    applyFixtures(mainSceneFixtures, outputParams, randomizerState)
-
-    splitScenes.forEach((split, i) => {
-      const splitGroups = activeScene.splitScenes[i]?.groups ?? []
+    splitScenes.forEach((split, splitIndex) => {
+      const splitGroups =
+        activeScene.splits[splitIndex] === undefined
+          ? []
+          : getSplitGroups(activeScene, splitIndex, activeGroups)
 
       const splitSceneFixtures = getFixturesInGroups(universe, splitGroups)
 

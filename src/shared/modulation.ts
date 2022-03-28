@@ -1,23 +1,17 @@
-import { initModulation, paramsList, Param, Modulation } from './params'
+import { paramsList, Param, Modulation } from './params'
 import { Lfo, GetValue, GetRamp } from './oscillator'
 import { LightScene_t } from './Scenes'
-import { clampNormalized, indexArray } from './util'
-import {
-  Params,
-  mapUndefinedParamsToDefault,
-  defaultOutputParams,
-} from './params'
+import { clampNormalized } from './util'
+import { mapUndefinedParamsToDefault, defaultOutputParams } from './params'
 
 export interface Modulator {
   lfo: Lfo
-  modulation: Modulation
   splitModulations: Modulation[]
 }
 
 export function initModulator(splitCount: number): Modulator {
   return {
     lfo: GetRamp(),
-    modulation: initModulation(),
     splitModulations: Array(splitCount)
       .fill(0)
       .map(() => ({})),
@@ -32,24 +26,15 @@ interface ModSnapshot {
 export function getOutputParams(
   beats: number,
   scene: LightScene_t,
-  splitIndex: number | null
+  splitIndex: number
 ) {
   const outputParams = defaultOutputParams()
-  const baseParams =
-    splitIndex === null
-      ? scene.baseParams
-      : scene.splitScenes[splitIndex].baseParams
+  const baseParams = scene.splits[splitIndex].baseParams
   const mappedParams = mapUndefinedParamsToDefault(baseParams)
-  const snapshots: ModSnapshot[] =
-    splitIndex === null
-      ? scene.modulators.map((modulator) => ({
-          modulation: modulator.modulation,
-          lfoVal: GetValue(modulator.lfo, beats),
-        }))
-      : scene.modulators.map((modulator) => ({
-          modulation: modulator.splitModulations[splitIndex],
-          lfoVal: GetValue(modulator.lfo, beats),
-        }))
+  const snapshots: ModSnapshot[] = scene.modulators.map((modulator) => ({
+    modulation: modulator.splitModulations[splitIndex],
+    lfoVal: GetValue(modulator.lfo, beats),
+  }))
 
   paramsList.forEach((param) => {
     outputParams[param] = getOutputParam(mappedParams[param], param, snapshots)

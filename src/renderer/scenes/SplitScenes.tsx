@@ -12,9 +12,7 @@ import { addSplitScene } from 'renderer/redux/controlSlice'
 export default function SplitScenes() {
   const dispatch = useDispatch()
   const activeScene = useControlSelector((scenes) => scenes.light.active)
-  const splitSceneCount = useActiveLightScene(
-    (scene) => scene.splitScenes.length
-  )
+  const splitSceneCount = useActiveLightScene((scene) => scene.splits.length)
 
   const indexes = indexArray(splitSceneCount)
 

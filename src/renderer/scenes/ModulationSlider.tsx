@@ -9,7 +9,7 @@ import Popup from 'renderer/base/Popup'
 import { indexArray } from 'shared/util'
 
 interface Props {
-  splitIndex: number | null
+  splitIndex: number
   modIndex: number
   param: Param
 }
@@ -68,11 +68,10 @@ export function AddModulationButton({ modIndex }: { modIndex: number }) {
 }
 
 function AddModulation({ modIndex }: { modIndex: number }) {
-  const numSplits = useActiveLightScene((scene) => scene.splitScenes.length)
+  const numSplits = useActiveLightScene((scene) => scene.splits.length)
 
   return (
     <AddModRoot>
-      <ParamsGroup splitIndex={null} modIndex={modIndex} />
       {indexArray(numSplits).map((splitIndex) => (
         <ParamsGroup splitIndex={splitIndex} modIndex={modIndex} />
       ))}
@@ -90,7 +89,7 @@ function ParamsGroup({
   splitIndex,
   modIndex,
 }: {
-  splitIndex: number | null
+  splitIndex: number
   modIndex: number
 }) {
   const baseParams = useBaseParams(splitIndex)
@@ -120,7 +119,7 @@ function ParamEditor({
   modIndex,
   param,
 }: {
-  splitIndex: number | null
+  splitIndex: number
   modIndex: number
   param: Param
 }) {

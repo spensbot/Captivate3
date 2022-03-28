@@ -3,15 +3,10 @@ import Counter2 from './Counter2'
 import ConnectionStatus from './ConnectionStatus'
 import { useRealtimeSelector } from '../redux/realtimeStore'
 import useDragBasic from '../hooks/useDragBasic'
-// TODO
-// import { incrementTempo, setLinkEnabled } from '../engine/engine'
 import styled from 'styled-components'
 import { SliderMidiOverlay } from '../base/MidiOverlay'
 import UndoRedo from 'renderer/controls/UndoRedo'
 import UsbIcon from '@mui/icons-material/Usb'
-import CableIcon from '@mui/icons-material/Cable'
-import SettingsIcon from '@mui/icons-material/Settings'
-import SettingsInputSvideoIcon from '@mui/icons-material/SettingsInputSvideo'
 import IconButton from '@mui/material/IconButton'
 import PianoIcon from '@mui/icons-material/Piano'
 import { useDeviceSelector, useTypedSelector } from '../redux/store'
@@ -33,7 +28,7 @@ function fixState(state: ControlState): ControlState {
   const light = state.light
   light.ids.forEach((id) => {
     const scene = light.byId[id]
-    if (scene.splitScenes === undefined) scene.splitScenes = []
+    if (scene.splits === undefined) scene.splits = []
     scene.modulators.forEach((modulator) => {
       if (modulator.splitModulations === undefined)
         modulator.splitModulations = []
