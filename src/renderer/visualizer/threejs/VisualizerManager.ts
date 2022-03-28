@@ -63,7 +63,7 @@ export default class VisualizerManager {
     }
     const effectsConfig = visualScene?.effectsConfig || []
     const stuff = {
-      params: res.rt.outputParams,
+      params: res.rt.splits[0].outputParams,
       time: res.rt.time,
       scene: control.light.byId[control.light.active],
       master: control.master,

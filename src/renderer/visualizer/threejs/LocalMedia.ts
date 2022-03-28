@@ -127,7 +127,7 @@ export default class LocalMedia extends VisualizerBase {
   index: number = 0
   lastMediaData: MediaData | null = null
 
-  constructor(config: LocalMediaConfig) {
+  constructor(_config: LocalMediaConfig) {
     super()
     this.config = initLocalMediaConfig()
     this.displayPlane = new THREE.PlaneGeometry(1, 1)

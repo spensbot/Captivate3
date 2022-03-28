@@ -47,7 +47,7 @@ export function initDmxState(): DmxState {
     activeFixtureType: null,
     activeFixture: null,
     activeGroups: [], // This field is pretty ugly. It's duplicate state that tracks all custom groups in the universe.
-    // Otherwise, activeGroups would need to be reduced from the universe multiple times per frame.
+    // Without this, activeGroups would need to be reduced from the universe multiple times per frame.
     // I think that would be a performance hit that warrants it's existence
   }
 }

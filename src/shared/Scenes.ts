@@ -50,7 +50,7 @@ export function initLightScene(): LightScene_t {
     name: 'Name',
     bombacity: 0,
     autoEnabled: true,
-    modulators: [initModulator(0)],
+    modulators: [initModulator(1)],
     splits: [initSplitScene()],
   }
 }

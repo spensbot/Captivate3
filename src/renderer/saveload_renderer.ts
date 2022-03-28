@@ -13,16 +13,45 @@ const AUTO_SAVE_INTERVAL = 1000 // ms
 // Modify this function to fix any state changes between upgrades
 export function fixState(state: CleanReduxState): CleanReduxState {
   const light = state.control.light
+
+  const dmx = state.dmx
+  dmx.universe.forEach((fixture) => {
+    const ogGroups = fixture.groups
+    if (ogGroups !== undefined) {
+      fixture.group = ogGroups[0] ?? 'Default'
+    }
+    delete fixture.groups
+  })
+
+  dmx.activeGroups = Array.from(
+    dmx.universe.reduce<Set<string>>((acc, fixture) => {
+      acc.add(fixture.group)
+      return acc
+    }, new Set())
+  )
+
   light.ids.forEach((id) => {
     const lightScene = light.byId[id]
-    const ogMainSplit = lightScene.splitScenes
-    if (ogMainSplit !== undefined) {
+
+    const ogBaseParams = lightScene.baseParams
+    const ogRandomizer = lightScene.randomizer
+    if (ogBaseParams !== undefined && ogRandomizer !== undefined) {
+      lightScene.splits = lightScene.splitScenes
       lightScene.splits.unshift({
-        baseParams: ogMainSplit.baseParams,
-        randomizer: ogMainSplit.randomizer,
+        baseParams: ogBaseParams,
+        randomizer: ogRandomizer,
         groups: [],
       })
     }
+    delete lightScene.splitScenes
+
+    lightScene.modulators.forEach((modulator) => {
+      const ogModulation = modulator.modulation
+      if (ogModulation !== undefined) {
+        modulator.splitModulations.unshift(ogModulation)
+      }
+      delete modulator.modulation
+    })
   })
   return state
 }
@@ -54,7 +83,7 @@ function saveState(state: CleanReduxState) {
 }
 
 export const autoSave = (store: ReduxStore) => {
-  refreshLastSession(store)
+  // refreshLastSession(store)
 
   setInterval(() => {
     saveState(getCleanReduxState(store.getState()))
