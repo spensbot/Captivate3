@@ -11,6 +11,7 @@ import {
   addSplitSceneGroup,
   removeSplitSceneGroup,
 } from 'renderer/redux/controlSlice'
+import { getSplitGroups } from 'shared/dmxUtil'
 
 interface Props {
   splitIndex: number
@@ -19,26 +20,34 @@ interface Props {
 export default function GroupSelection({ splitIndex }: Props) {
   const dispatch = useDispatch()
   const [isOpen, setIsOpen] = useState(false)
-  const activeGroups = useDmxSelector((dmx) => dmx.activeGroups)
   const splitGroups = useActiveLightScene(
     (scene) => scene.splits[splitIndex].groups
   )
   const splitGroupsString = splitGroups.join(', ')
 
+  const isMain = splitIndex === 0
+
+  let groupsString =
+    splitGroups.length > 0
+      ? `Groups: ${splitGroupsString}`
+      : isMain
+      ? `All Groups`
+      : `No Groups`
+
   return (
     <Root>
-      <IconButton
-        size="small"
-        onClick={(e) => {
-          e.preventDefault()
-          dispatch(removeSplitSceneByIndex(splitIndex))
-        }}
-      >
-        <RemoveIcon />
-      </IconButton>
-      <GroupName>
-        {splitGroups.length > 0 ? `Groups: ${splitGroupsString}` : `No Groups`}
-      </GroupName>
+      {splitIndex !== 0 && (
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.preventDefault()
+            dispatch(removeSplitSceneByIndex(splitIndex))
+          }}
+        >
+          <RemoveIcon />
+        </IconButton>
+      )}
+      <Groups>{groupsString}</Groups>
       <IconButton
         size="small"
         onClick={(e) => {
@@ -49,34 +58,52 @@ export default function GroupSelection({ splitIndex }: Props) {
         <EditIcon />
       </IconButton>
       {isOpen && (
-        <Popup title="Select Groups" onClose={() => setIsOpen(false)}>
-          {activeGroups.map((group) => {
-            const isActive = splitGroups.includes(group)
-            const payload = {
-              index: splitIndex,
-              group,
-            }
-            return (
-              <AvailableGroup
-                key={group}
-                style={
-                  isActive
-                    ? {}
-                    : { opacity: 0.5, textDecoration: 'line-through' }
-                }
-                onClick={() =>
-                  isActive
-                    ? dispatch(removeSplitSceneGroup(payload))
-                    : dispatch(addSplitSceneGroup(payload))
-                }
-              >
-                {group}
-              </AvailableGroup>
-            )
-          })}
-        </Popup>
+        <SelectGroupsPopup
+          splitIndex={splitIndex}
+          onClose={() => setIsOpen(false)}
+        />
       )}
     </Root>
+  )
+}
+
+interface Props2 {
+  splitIndex: number
+  onClose: () => void
+}
+
+function SelectGroupsPopup({ splitIndex, onClose }: Props2) {
+  const dispatch = useDispatch()
+  const activeGroups = useDmxSelector((dmx) => dmx.activeGroups)
+  let activeScene = useActiveLightScene((scene) => scene)
+
+  const splitGroups = getSplitGroups(activeScene, splitIndex, activeGroups)
+
+  return (
+    <Popup title="Select Groups" onClose={onClose}>
+      {activeGroups.map((group) => {
+        const isActive = splitGroups.includes(group)
+        const payload = {
+          index: splitIndex,
+          group,
+        }
+        return (
+          <AvailableGroup
+            key={group}
+            style={
+              isActive ? {} : { opacity: 0.5, textDecoration: 'line-through' }
+            }
+            onClick={() =>
+              isActive
+                ? dispatch(removeSplitSceneGroup(payload))
+                : dispatch(addSplitSceneGroup(payload))
+            }
+          >
+            {group}
+          </AvailableGroup>
+        )
+      })}
+    </Popup>
   )
 }
 
@@ -86,7 +113,7 @@ const Root = styled.div`
   align-items: center;
 `
 
-const GroupName = styled.div`
+const Groups = styled.div`
   margin-right: 0.5rem;
   font-size: 1rem;
 `

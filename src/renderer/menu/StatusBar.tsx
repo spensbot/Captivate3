@@ -21,28 +21,15 @@ import FileOpenIcon from '@mui/icons-material/FileOpen'
 import { send_user_command } from '../ipcHandler'
 import TapTempo from './TapTempo'
 import PlayPauseButton from './PlayPauseButton'
+import { fixControlState } from 'shared/fixState'
 
 type SaveType = ControlState
-
-function fixState(state: ControlState): ControlState {
-  const light = state.light
-  light.ids.forEach((id) => {
-    const scene = light.byId[id]
-    if (scene.splits === undefined) scene.splits = []
-    scene.modulators.forEach((modulator) => {
-      if (modulator.splitModulations === undefined)
-        modulator.splitModulations = []
-    })
-  })
-  return state
-}
 
 function loadScenes() {
   loadFile('Load Scenes', [captivateFileFilters.scenes])
     .then((serializedControlState) => {
-      const newControlState: SaveType = fixState(
-        JSON.parse(serializedControlState)
-      )
+      const newControlState: SaveType = JSON.parse(serializedControlState)
+      fixControlState(newControlState)
 
       store.dispatch(
         resetControl({
